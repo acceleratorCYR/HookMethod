@@ -1,5 +1,8 @@
 # HookMethod
-## Required:  
+
+## Describe  
+This is used for android device to hook method in apps; It is based on Xposed.
+## Required 
 1. xposed  
 2. phone has been rooted  
 
@@ -16,15 +19,15 @@
 3. !no need to restart phone
 
 ### format of each line in monitor.conf  
-- [packageName] [className] [funcName] #hook normal function or native function  
-- [packageName] [className]  #hook construct function  
+each line in monitor.conf should be like:
+- [packageName] [classFullPath] [MethodName] #hook normal Method or native method    
+- [packageName] [classFullPath]  #hook construct Method
 
-### Example
+### Example of monitor.conf(it can contains multi lines):
 /data/local/tmp/monitor.conf:
 ```conf
-com.kakao.talk com.kakao.talk.a.b.c funcA
-com.kakao.talk com.kakao.talkb.c.s funcB
-com.kakao.talk com.kakao.b.d
+com.accelerator.test com.accelerator.test.Main onCreate
+com.accelerator.test com.accelerator.test.Main
 ``` 
 
 
