@@ -24,7 +24,7 @@ public class HookMethod  implements IXposedHookLoadPackage {
     private ClassLoader classLoader;
     private XC_MethodHook methodhook;
 
-    private static String confFileName = "/data/data/im_test.hookmethod/monitor.conf";
+    private static String confFileName = "/data/local/tmp/monitor.conf";
 
 
     private boolean tryHookMethodByNameWithMethod(String className, String methodName, XC_MethodHook methodhook)
@@ -36,9 +36,10 @@ public class HookMethod  implements IXposedHookLoadPackage {
             for(Method deMethod:deMethods)
             {
                 //XposedBridge.log(deMethod.getName());
+
                 if(methodName.equals(deMethod.getName()))
                 {
-                    //XposedBridge.log("start to hook method :" +className + "#"+ methodName);
+                    XposedBridge.log(" monitor start to hook method :" +className + "#"+ methodName);
                     //XposedBridge.log("start to hook method :" +className + "#"+ methodName);
                     XposedBridge.hookMethod(deMethod, methodhook);
 

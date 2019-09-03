@@ -6,6 +6,7 @@ import android.util.Log;
 import javax.crypto.CipherSpi;
 
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XposedBridge;
 
 /**
  * Created by im-mac on 2018/1/23.
@@ -87,8 +88,8 @@ public class MyMethodHook extends XC_MethodHook {
     {
         if(obj == null)
         {
-            outputStr.append("\n | " + paramtag + " " + Integer.toString(i) + ": "
-                    +  "null ");
+            //outputStr.append("\n | " + paramtag + " " + Integer.toString(i) + ": "
+            //        +  "null ");
             return;
         }
         else
@@ -109,6 +110,10 @@ public class MyMethodHook extends XC_MethodHook {
         }else if(CheckType(obj, boolean.class))
         {
             outputStr.append((boolean)obj?"true":"false");
+
+        }else if(CheckType(obj, Boolean.class))
+        {
+            outputStr.append((Boolean)obj?"true":"false");
 
         }else if(CheckType(obj, Long.class))
         {
@@ -142,6 +147,22 @@ public class MyMethodHook extends XC_MethodHook {
         {
             byte[] keys = ((javax.crypto.spec.SecretKeySpec)obj).getEncoded();
             OutputByteArray( outputStr, (byte[])keys);
+        }else
+        if(CheckType(obj, android.os.Message.class))
+        {
+            outputStr.append("\n\tMessage\n\t what: ");
+            outputStr.append(((android.os.Message)obj).what);
+            outputStr.append("\n\targ1: ");
+            outputStr.append(((android.os.Message)obj).arg1);
+            outputStr.append("\n\targ2: ");
+            outputStr.append(((android.os.Message)obj).arg2);
+            outputStr.append("\n\tobj: ");
+            if(((android.os.Message)obj).obj != null)
+            outputStr.append(((android.os.Message)obj).obj.toString());
+            outputStr.append("\n\tBundle: ");
+            if(((android.os.Message)obj).getData() != null){
+                outputStr.append(((android.os.Message)obj).getData().toString());
+            }
         }
 
     }
@@ -149,26 +170,85 @@ public class MyMethodHook extends XC_MethodHook {
     @Override
     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
         super.beforeHookedMethod(param);
-    }
-
-    @Override
-    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+        //XposedBridge.log("success hook method");
+        return;
+/*
         Throwable th = new Throwable();
         StackTraceElement[] stackTraces = th.getStackTrace();
 
-        StringBuffer stackOutput = new StringBuffer("monitor HookMethodStackTraceAfter "
-                + param.getClass().getName());
+        StringBuffer stackOutput = new StringBuffer("monitor StackTraceBefore ");
+        if(param.thisObject != null)
+            stackOutput.append(param.thisObject.getClass().getName());
 
         if(stackTraces != null)
         {
-            for(int i=0; i< (stackTraces.length < 20? stackTraces.length: 20); i++)
+            int i = 2;
+            for(; i< (stackTraces.length < 22? stackTraces.length: 22); i++)
             {
                 stackOutput.append(String.format("\n      StackTrace: %s #%s :%s",
                         stackTraces[i].getClassName(),
                         stackTraces[i].getMethodName(), stackTraces[i].getLineNumber()));
+                if(stackTraces[i].getClassName().endsWith("Log"))
+                    break;
 
             }
-            if(stackTraces.length >= 20)
+            if(i >= 22)
+            {
+                stackOutput.append("\n      ......   ...... \n");
+            }
+        }
+
+        //Object methodResult = param.getResult();
+
+
+        if(param.args == null)
+            stackOutput.append("\nafter Call paramsLen: 0 ");
+        else {
+            stackOutput.append("\nafter Call paramsLen:" + param.args.length + " ");
+
+            for (int i = 0; i < param.args.length; i++) {
+                TryOutputParamOrResult(stackOutput, param.args[i], "param", i);
+
+            }
+        }
+
+        //TryOutputParamOrResult(stackOutput, methodResult, "result", 0);
+
+        stackOutput.append("\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
+        int i = 0;
+        while(i+1024 < stackOutput.length())
+        {
+            //String tmpstr = stackOutput.substring(0,1024);
+            Log.i(tag, stackOutput.substring(i,i + 1024));
+            i = i + 1024;
+        }
+        Log.i(tag, stackOutput.substring(i));
+        */
+    }
+
+    @Override
+    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+        //XposedBridge.log("success hook method");
+        Throwable th = new Throwable();
+        StackTraceElement[] stackTraces = th.getStackTrace();
+
+        StringBuffer stackOutput = new StringBuffer("monitor HookMethodStackTraceAfter ");
+        if(param.thisObject != null)
+            stackOutput.append(param.thisObject.getClass().getName());
+
+        if(stackTraces != null)
+        {
+            int i = 2;
+            for(; i< (stackTraces.length < 22? stackTraces.length: 22); i++)
+            {
+                stackOutput.append(String.format("\n      StackTrace: %s #%s :%s",
+                        stackTraces[i].getClassName(),
+                        stackTraces[i].getMethodName(), stackTraces[i].getLineNumber()));
+                if(stackTraces[i].getClassName().endsWith("Log"))
+                    break;
+
+            }
+            if(i >= 22)
             {
                 stackOutput.append("\n      ......   ...... \n");
             }
@@ -191,7 +271,15 @@ public class MyMethodHook extends XC_MethodHook {
         TryOutputParamOrResult(stackOutput, methodResult, "result", 0);
 
         stackOutput.append("\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
-        Log.w(tag, stackOutput.toString());
+        int i = 0;
+        while(i+1024 < stackOutput.length())
+        {
+            //String tmpstr = stackOutput.substring(0,1024);
+            Log.i(tag, stackOutput.substring(i,i + 1024));
+            i = i + 1024;
+        }
+        Log.i(tag, stackOutput.substring(i));
+
 
 
         super.afterHookedMethod(param);
