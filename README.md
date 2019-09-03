@@ -15,9 +15,10 @@
 2. restart app
 3. !no need to restart phone
 
-format of each line in monitor.conf
-[packageName] [className] [funcName] #hook normal function or native function  
-[packageName] [className]  #hook construct function  
+### format of each line in monitor.conf  
+- [packageName] [className] [funcName] #hook normal function or native function  
+- [packageName] [className]  #hook construct function  
+
 ### Example
 /data/local/tmp/monitor.conf:
 ```conf
